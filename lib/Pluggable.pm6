@@ -8,7 +8,10 @@ role Pluggable {
       try {
         my Str $start = "{$dir.Str.IO.path}/$class/$plugin".IO.path.absolute.Str;
         for self!search($start, base => $start.chars + 1, baseclass => "{$class}::{$plugin}::", pattern => $pattern) -> $m {
-          @list.push($m); 
+          try {
+            require ::("$m");
+            @list.push($m);
+          };
         }
 #        CATCH { .resume; }
       }
@@ -29,12 +32,11 @@ role Pluggable {
         }
 #        CATCH { .resume; }
       };
-      @r.push($baseclass ~
-              $f.absolute.Str.\
-                substr($base).\
-                subst($pattern, '').\
-                subst(/ [ '/' | '\\' ] /, '::')
-             ) if $f.IO ~~ :f && $f.basename.match($pattern);
+      my $modulename = $f.absolute.Str.\
+                          substr($base).\
+                          subst($pattern, '');
+      $modulename   ~~ s:g/ [ '/' | '\\' ] /::/;
+      @r.push("$baseclass$modulename") if $f.IO ~~ :f && $f.basename.match($pattern);
     }
     return @r;
   }

@@ -3,7 +3,7 @@
 use Pluggable; 
 use Test;
 
-plan 8;
+plan 9;
 
 class Power does Pluggable {
   has %.testcases = 
@@ -34,8 +34,9 @@ class Checker2 does Pluggable {
     'Power::DontMatch'                => False,
   ;
   has %.testcase2 = 
-    'Checker2::PluginDir::Plugin1'    => True,
-    'Checker2::PluginDir::Plugin3'    => True,
+    'Checker2::PluginDir::Plugin1'    => False,
+    'Checker2::PluginDir::Plugin3'    => False,
+    'Checker2::PluginDir::Plugin2::Plugin2::Plugin2::DEEP' => True,
   ;
 
   method test() {
