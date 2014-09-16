@@ -49,7 +49,7 @@ Can be set to another module name if you'd like to look for Plugins available to
 
 ###:$pattern (optional)
 Default: ```/ '.pm6' $ /```
-Can be set to anything, another useful option would be ```/ [ '.pm6' | '.pm' ] $ /```, this is used to match against the IO.basename in order to determine if the file contains a module.  Presently nothing exists to ensure we can 'require' said module.
+Can be set to anything, another useful option would be ```/ [ '.pm6' | '.pm' ] $ /```, this is used to match against the IO.basename in order to determine if the file contains a module.  ```Pluggable``` only adds the module to the list if it can ```require``` said module.
 
 #License
 
