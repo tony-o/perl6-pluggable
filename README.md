@@ -40,18 +40,19 @@ Usage:  $.plugin( :$plugin, :$module, :$pattern )
 
 ###:$plugin (mandatory)
 
-Default: 'Plugin'
+Default: ```Plugins```
 Plugin should be set to the plugin directory
 
 ###:$module (optional)
-Default: ::?CLASS
+Default: ```::?CLASS```
 Can be set to another module name if you'd like to look for Plugins available to another module
 
 ###:$pattern (optional)
-Default: / '.pm6' $ /
-Can be set to anything, another useful option would be / [ '.pm6' | '.pm' ] $ / - this is used to match against the IO.basename in order to determine if the file contains a module.  Presently nothing exists to ensure we can 'require' said module.
+Default: ```/ '.pm6' $ /```
+Can be set to anything, another useful option would be ```/ [ '.pm6' | '.pm' ] $ /```, this is used to match against the IO.basename in order to determine if the file contains a module.  Presently nothing exists to ensure we can 'require' said module.
 
 #License
 
 Free, do whatever you want with this.
+
 -[@tony-o](https://www.gittip.com/tony-o/)
