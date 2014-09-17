@@ -3,7 +3,8 @@
 role Pluggable {
   method plugins(:$module, :$plugin = 'Plugins', :$pattern = / '.pm6' $ /){
     my @list;
-    my $class = "{$module:defined ?? $module !! ::?CLASS.^name}".subst(«::», '/');
+    my $class = "{$module:defined ?? $module !! ::?CLASS.^name}";
+    $class   ~~ s:g/'::'/\//;
     for (@*INC) -> $dir, {
       try {
         my Str $start = "{$dir.Str.IO.path}/$class/$plugin".IO.path.absolute.Str;
