@@ -8,16 +8,15 @@ role Pluggable {
     for (@*INC) -> $dir, {
       try {
         my Str $start = "{$dir.Str.IO.path}/$class/$plugin".IO.path.absolute.Str;
-        for self!search($start, base => $start.chars + 1, baseclass => "{$class}::{$plugin}::", pattern => $pattern) -> $m {
+        for self!search($start, base => $start.chars + 1, baseclass => "{$class}::{$plugin}::", pattern => $pattern) -> $t {
           try {
-            say "befor: $m";
-            $m ~~ s:g/ \/ / :: /;
-            say "after: $m";
+            my $m = $t;
+            $m ~~ s:g/\//::/;
             require ::("$m");
             @list.push($m);
           };
         }
-#        CATCH { .resume; }
+        #CATCH { .resume; }
       }
     };
     return @list;

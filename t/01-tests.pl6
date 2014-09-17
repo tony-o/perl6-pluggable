@@ -27,16 +27,16 @@ class Power does Pluggable {
   }
 };
 
-class Checker2 does Pluggable {
+class Checker2::T does Pluggable {
   has %.testcase1 = 
     'Power::Plugins::Teaser::Helpers' => True,
     'Power::Plugins::Teaser'          => True,
     'Power::DontMatch'                => False,
   ;
   has %.testcase2 = 
-    'Checker2::PluginDir::Plugin1'    => False,
-    'Checker2::PluginDir::Plugin3'    => False,
-    'Checker2::PluginDir::Plugin2::Plugin2::Plugin2::DEEP' => True,
+    'Checker2::T::PluginDir::Plugin1'    => False,
+    'Checker2::T::PluginDir::Plugin3'    => False,
+    'Checker2::T::PluginDir::Plugin2::Plugin2::Plugin2::DEEP' => True,
   ;
 
   method test() {
@@ -67,4 +67,4 @@ class Checker2 does Pluggable {
 };
 
 Power.new.test;
-Checker2.new.test;
+Checker2::T.new.test;
