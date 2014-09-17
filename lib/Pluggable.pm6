@@ -10,8 +10,9 @@ role Pluggable {
         my Str $start = "{$dir.Str.IO.path}/$class/$plugin".IO.path.absolute.Str;
         for self!search($start, base => $start.chars + 1, baseclass => "{$class}::{$plugin}::", pattern => $pattern) -> $m {
           try {
+            say "befor: $m";
             $m ~~ s:g/ \/ / :: /;
-            say $m;
+            say "after: $m";
             require ::("$m");
             @list.push($m);
           };
