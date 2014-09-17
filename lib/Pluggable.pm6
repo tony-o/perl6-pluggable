@@ -11,6 +11,7 @@ role Pluggable {
         for self!search($start, base => $start.chars + 1, baseclass => "{$class}::{$plugin}::", pattern => $pattern) -> $m {
           try {
             $m ~~ s:g/ \/ / :: /;
+            say $m;
             require ::("$m");
             @list.push($m);
           };
