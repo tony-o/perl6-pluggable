@@ -7,7 +7,7 @@ role Pluggable {
     $class   ~~ s:g/'::'/\//;
     for (@*INC) -> $dir, {
       try {
-        my Str $start = "{$dir.Str.IO.path}/$class/$plugin".IO.path.absolute.Str;
+        my Str $start = "{$dir.Str.IO.path}/$class/$plugin".IO.absolute;
         for self!search($start, base => $start.chars + 1, baseclass => "{$class}::{$plugin}::", pattern => $pattern) -> $t {
           try {
             my $m = $t;
@@ -16,7 +16,7 @@ role Pluggable {
             @list.push($m);
           };
         }
-        #CATCH { .resume; }
+        CATCH { .say; }
       }
     };
     return @list;
