@@ -1,5 +1,6 @@
 #!/usr/bin/env perl6
 
+use lib 't/lib';
 use Pluggable; 
 use Test;
 
@@ -14,13 +15,11 @@ class Power does Pluggable {
 
   method test() {
     my @plugins = @( $.plugins );
-    @plugins.say;
     my ($test, $count);
     $count = 0;
     for %.testcases.keys -> $k {
       $test = False;
       for @plugins -> $p {
-        $p.say;
         $test = True, last if $p eq $k;
       }
       $count++ if True ~~ %.testcases{$k};
