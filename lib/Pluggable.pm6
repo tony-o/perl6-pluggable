@@ -23,7 +23,7 @@ role Pluggable {
   }
 
   method !search(Str $dir, Int $recursion = 10, :$baseclass, :$base, :$pattern){ #default to 10 iterations deep
-    return if $recursion < 0 || $dir !~~ :d;
+    return if $recursion < 0 || $dir.IO !~~ :d;
 
     my @r;
     for dir($dir) -> $f {
