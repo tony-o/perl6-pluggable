@@ -16,7 +16,7 @@ role Pluggable {
             @list.push($m);
           };
         }
-        CATCH { .say; }
+        #CATCH { .say; }
       }
     };
     return @list;
