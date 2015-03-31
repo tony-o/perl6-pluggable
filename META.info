@@ -6,6 +6,6 @@
   "depends"     : [ ],
   "provides"    : {
     "Pluggable" : "lib/Pluggable.pm6"
-  }
+  },
   "source-url"  : "git://github.com/tony-o/perl6-pluggable.git"
 } 
