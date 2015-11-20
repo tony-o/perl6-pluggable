@@ -3,7 +3,7 @@
 role Pluggable {
   method plugins(:$module, :$plugin = 'Plugins', :$pattern = / '.pm6' $ /){
     my @list;
-    my $class = "{$module:defined ?? $module !! ::?CLASS.^name}";
+    my $class = "{$module.defined ?? $module !! ::?CLASS.^name}";
     $class   ~~ s:g/'::'/\//;
     for (@*INC) -> $dir, {
       my ($type, $path) = $dir.split('#', 2);
