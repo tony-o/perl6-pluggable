@@ -13,7 +13,6 @@ role Pluggable {
           try {
             my $m = $t;
             $m ~~ s:g/\//::/;
-            $m.say;
             require ::("$m");
             @list.push($m);
           };
