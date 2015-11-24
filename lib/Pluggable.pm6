@@ -20,7 +20,7 @@ role Pluggable {
         #CATCH { .say; }
       }
     };
-    return @list;
+    return @list.unique.Array;
   }
 
   method !search(Str $dir, Int $recursion = 10, :$baseclass, :$base, :$pattern){ #default to 10 iterations deep
