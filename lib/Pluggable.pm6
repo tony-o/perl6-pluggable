@@ -1,47 +1,86 @@
-#!/usr/bin/env perl6
+unit role Pluggable;
 
-role Pluggable {
-  method plugins(:$module, :$plugin = 'Plugins', :$pattern = / '.pm6' $ /){
-    my @list;
-    my $class = "{$module.defined ?? $module !! ::?CLASS.^name}";
-    $class   ~~ s:g/'::'/\//;
-    for (@*INC) -> $dir, {
-      my ($type, $path) = $dir.split('#', 2);
-      try {
-        my Str $start = "{$path.Str.IO.path}/$class/$plugin".IO.absolute;
-        for self!search($start, base => $start.chars + 1, baseclass => "{$class}::{$plugin}::", pattern => $pattern) -> $t {
-          try {
-            my $m = $t;
-            $m ~~ s:g/\//::/;
-            require ::("$m");
-            @list.push($m);
-          };
-        }
-        #CATCH { .say; }
-      }
-    };
-    return @list.unique.Array;
-  }
+use JSON::Fast;
+use File::Find;
 
-  method !search(Str $dir, Int $recursion = 10, :$baseclass, :$base, :$pattern){ #default to 10 iterations deep
-    return if $recursion < 0 || $dir.IO !~~ :d;
+# XXX pod
+# XXX README.md
 
-    my @r;
-    for dir($dir) -> $f {
-      try { 
-        if $f.IO ~~ :d {
-          for self!search($f.absolute.Str, $recursion - 1, :$base, :$baseclass, :$pattern) -> $d {
-            @r.push($d);
-          };
-        }
-#        CATCH { .resume; }
-      };
-      my $modulename = $f.absolute.Str.\
-                          substr($base).\
-                          subst($pattern, '');
-      $modulename   ~~ s:g/ [ '/' | '\\' ] /::/;
-      @r.push("$baseclass$modulename") if $f.IO ~~ :f && $f.basename.match($pattern);
-    }
-    return @r;
-  }
+method plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$matcher = Nil) {
+    my $class = "{$base.defined ?? $base !! ::?CLASS.^name}";
+    return find-modules($class, $plugins-namespace, $matcher);
 }
+
+# procedural interface
+sub plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$matcher = Nil) is export {
+    return find-modules($base, $plugins-namespace, $matcher);
+}
+
+my sub match-try-add-module($module-name, $base, $namespace, $matcher, @result) {
+    # XXX should not match if exactly the starts-with string, test case 02 can
+    # be modified to check by removing matcher, or create an extra .pm6 in CaseA
+    if ($module-name.starts-with("{$base}::{$namespace}")) {
+        if ((!defined $matcher) || ($module-name ~~ $matcher)) {
+            try {
+                CATCH {
+                    default {
+                         say .WHAT.perl, do given .backtrace[0] { .file, .line, .subname }
+                    }
+                }
+                require ::($module-name);
+                say "!!A!!!!! $module-name";
+                my $string = "ofenrohr";
+                # XXX we should filtert out non-class units in the
+                # oop case...
+                # say ::($f).HOW;
+                @result.push(::($module-name));
+            }
+        }
+    }
+}
+
+# XXX remove debug output
+my sub find-modules($base, $namespace, $matcher) {
+    my @result = ();
+#    say "base: " ~ $base;
+#    say "namespace: " ~ $namespace;
+
+    for $*REPO.repo-chain -> $r {
+        given $r.WHAT {
+            when CompUnit::Repository::FileSystem { 
+#                say "  # filesystem {$r.prefix}";
+                my @files = find(dir => $r.prefix, name => /\.pm6?$/);
+                @files = map(-> $s { $s.substr($r.prefix.chars + 1) }, @files);
+                @files = map(-> $s { $s.substr(0, $s.rindex('.')) }, @files);
+                @files = map(-> $s { $s.subst(/\//, '::', :g) }, @files);
+#                say "    " ~ @files;
+                for @files -> $f {
+                    match-try-add-module($f, $base, $namespace, $matcher, @result);
+                }
+            }
+            when CompUnit::Repository::Installation {
+                # XXX once $r.installed() is fixed, this can get much
+                # shorter...
+#                say "  # installation {$r.prefix}";
+                my $dist_dir = $r.prefix.child('dist');
+                if ($dist_dir.?e) {
+                    for $dist_dir.IO.dir.grep(*.IO.f) -> $idx_file {
+                        my $data = from-json($idx_file.IO.slurp);
+#                        say "    " ~ $data{'provides'}.keys.perl;
+                        for $data{'provides'}.keys -> $f {
+                            match-try-add-module($f, $base, $namespace, $matcher, @result);
+                        }    
+                    }
+                }
+                #say "@@@" ~ $r.WHAT;
+                #say "@@@" ~ $r.installed();
+            }
+            default { 
+#                say "  # unknown repository type " ~ $r.WHAT.perl; 
+            }
+        }
+    }
+    say @result.perl;
+    return @result.unique.Array;
+}
+
