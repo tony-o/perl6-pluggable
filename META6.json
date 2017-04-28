@@ -1,13 +1,17 @@
 {
-  "perl"        : "6.*",
+  "perl"        : "6.c",
   "name"        : "Pluggable",
-  "version"     : "0.1.0",
-  "description" : "Helper role to find plugins for your module",
-  "author"      : "Tony ODell",
-  "depends"     : [ ],
+  "version"     : "0.1",
+  "description" : "Find plugin classes or modules",
+  "authors"     : [ 
+    "Robert Lemmen", 
+    "Tony ODell" 
+  ],
+  "depends"     : [ 
+    "Test::META" 
+  ],
   "provides"    : {
     "Pluggable" : "lib/Pluggable.pm6"
   },
-  "auth": "github:tony-o",
-  "source-url"  : "git://github.com/tony-o/perl6-pluggable.git"
+  "source-url"  : "https://github.com/robertlemmen/perl6-pluggable.git"
 } 
