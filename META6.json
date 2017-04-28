@@ -10,6 +10,9 @@
   "depends"     : [ 
     "Test::META" 
   ],
+  "test-depends": [ 
+    "SVG::Plot::Pie"
+  ],
   "provides"    : {
     "Pluggable" : "lib/Pluggable.pm6"
   },
