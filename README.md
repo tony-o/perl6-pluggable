@@ -1,10 +1,12 @@
-# Perl6 Role 'Pluggable'
+# Perl6 'Pluggable'
 
-Role that assists in finding plugins for a module .. 
+Automatically find modules or classes under a given namespace. This version
+is based on https://github.com/tony-o/perl6-pluggable.
 
-## Currently handles:
-* Custom directory searching (Module::$PluginDir)
-* Customer perl module matching, by default it just looks for .pm6
+## Features
+
+* Role as well as procedural interface
+* Custom perl module matching
 * Finding plugins outside of the current modules namespace 
 
 ## Example
@@ -16,43 +18,55 @@ a::Plugins::Plugin2
 a::Plugins::PluginClass1::PluginClass2::Plugin3
 ```
 
+### Invocation
 ```perl6
 use Pluggable; 
 
 class a does Pluggable {
   method listplugins () {
-    @($.plugins).join("\n").say;
+    @($.plugins).map({.perl}).join("\n").say;
   }
 }
 
 a.new.listplugins;
 ```
-## Output
+### Output
 ```
 a::Plugins::Plugin1
 a::Plugins::Plugin2
 a::Plugins::PluginClass1::PluginClass2::Plugin3
 ```
 
-## Options
+## OO Interface
 
-Usage:  $.plugins( :$plugin, :$module, :$pattern )
+When "doing" the Pluggable role, a class can use the "plugins" method:
 
-### :$plugin (mandatory)
+    $.plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$matcher = Nil)
 
-Default: ```Plugins```
-Plugin should be set to the plugin directory
+### :$base (optional)
 
-### :$module (optional)
-Default: ```::?CLASS```
-Can be set to another module name if you'd like to look for Plugins available to another module
+### :$plugins-namespace (default: 'Plugins')
 
-### :$pattern (optional)
-Default: ```/ '.pm6' $ /```
-Can be set to anything, another useful option would be ```/ [ '.pm6' | '.pm' ] $ /```, this is used to match against the IO.basename in order to determine if the file contains a module.  ```Pluggable``` only adds the module to the list if it can ```require``` said module.
+### :$matcher (optional)
 
-# License
+## Procedural Interface
 
-Free, do whatever you want with this.
+In a similar fashion, the module can be used in a non-OO environment, it exports
+a single sub:
 
--[@tony-o](https://www.gittip.com/tony-o/)
+    plugins($base, :$plugins-namespace = 'Plugins', :$matcher = Nil)
+
+### $base (required)
+
+### :$plugins-namespace (default: 'Plugins')
+
+### :$matcher (optional)
+
+## License
+
+Released under [Artistic License 2.0](http://www.perlfoundation.org/artistic_license_2_0).
+
+## Authors
+
+- [Robert Lemmen] (mailto:Robert Lemmen <robertle@semistable.com>)
+- [@tony-o](https://www.github.com/tony-o/)

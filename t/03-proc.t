@@ -11,6 +11,6 @@ my @expected = [
         'CaseA::Plugins::Class2',
     ];
 
-my @plugins = plugins(:base('CaseA'));
+my @plugins = plugins('CaseA');
 ok @plugins.map({ .WHAT.perl }).sort eqv @expected.sort;
 
