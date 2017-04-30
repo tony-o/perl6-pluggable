@@ -68,5 +68,5 @@ Released under [Artistic License 2.0](http://www.perlfoundation.org/artistic_lic
 
 ## Authors
 
-- [Robert Lemmen] (mailto:Robert Lemmen <robertle@semistable.com>)
+- Robert Lemmen <robertle@semistable.com>
 - [@tony-o](https://www.github.com/tony-o/)
