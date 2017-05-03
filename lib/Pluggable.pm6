@@ -16,9 +16,9 @@ sub plugins($base, :$plugins-namespace = 'Plugins', :$name-matcher = Nil) is exp
 }
 
 my sub match-try-add-module($module-name, $base, $namespace, $name-matcher, @result) {
-    # XXX should not match if exactly the starts-with string, test case 02 can
-    # be modified to check by removing matcher, or create an extra .pm6 in CaseA
-    if ($module-name.starts-with("{$base}::{$namespace}")) {
+    if (   ($module-name.chars > "{$base}::{$namespace}".chars)
+        && ($module-name.starts-with("{$base}::{$namespace}")) ) {
+
         if ((!defined $name-matcher) || ($module-name ~~ $name-matcher)) {
             try {
                 CATCH {
