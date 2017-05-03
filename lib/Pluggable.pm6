@@ -5,21 +5,21 @@ use File::Find;
 
 # XXX pod
 
-method plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$matcher = Nil) {
+method plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$name-matcher = Nil) {
     my $class = "{$base.defined ?? $base !! ::?CLASS.^name}";
-    return find-modules($class, $plugins-namespace, $matcher);
+    return find-modules($class, $plugins-namespace, $name-matcher);
 }
 
 # procedural interface
-sub plugins($base, :$plugins-namespace = 'Plugins', :$matcher = Nil) is export {
-    return find-modules($base, $plugins-namespace, $matcher);
+sub plugins($base, :$plugins-namespace = 'Plugins', :$name-matcher = Nil) is export {
+    return find-modules($base, $plugins-namespace, $name-matcher);
 }
 
-my sub match-try-add-module($module-name, $base, $namespace, $matcher, @result) {
+my sub match-try-add-module($module-name, $base, $namespace, $name-matcher, @result) {
     # XXX should not match if exactly the starts-with string, test case 02 can
     # be modified to check by removing matcher, or create an extra .pm6 in CaseA
     if ($module-name.starts-with("{$base}::{$namespace}")) {
-        if ((!defined $matcher) || ($module-name ~~ $matcher)) {
+        if ((!defined $name-matcher) || ($module-name ~~ $name-matcher)) {
             try {
                 CATCH {
                     default {
@@ -33,7 +33,7 @@ my sub match-try-add-module($module-name, $base, $namespace, $matcher, @result) 
     }
 }
 
-my sub find-modules($base, $namespace, $matcher) {
+my sub find-modules($base, $namespace, $name-matcher) {
     my @result = ();
 
     for $*REPO.repo-chain -> $r {
@@ -44,7 +44,7 @@ my sub find-modules($base, $namespace, $matcher) {
                 @files = map(-> $s { $s.substr(0, $s.rindex('.')) }, @files);
                 @files = map(-> $s { $s.subst(/\//, '::', :g) }, @files);
                 for @files -> $f {
-                    match-try-add-module($f, $base, $namespace, $matcher, @result);
+                    match-try-add-module($f, $base, $namespace, $name-matcher, @result);
                 }
             }
             when CompUnit::Repository::Installation {
@@ -55,7 +55,7 @@ my sub find-modules($base, $namespace, $matcher) {
                     for $dist_dir.IO.dir.grep(*.IO.f) -> $idx_file {
                         my $data = from-json($idx_file.IO.slurp);
                         for $data{'provides'}.keys -> $f {
-                            match-try-add-module($f, $base, $namespace, $matcher, @result);
+                            match-try-add-module($f, $base, $namespace, $name-matcher, @result);
                         }    
                     }
                 }

@@ -14,7 +14,7 @@ class SVGPlotters does Pluggable {
         ];
 
     method test() {
-        my @plugins = @( $.plugins(:base('SVG'), :plugins-namespace('Plot'), :matcher(/Pie/)) );
+        my @plugins = @( $.plugins(:base('SVG'), :plugins-namespace('Plot'), :name-matcher(/Pie/)) );
         ok @plugins.map({ .WHAT.perl }).sort eqv @.expected.sort;
     }
 };

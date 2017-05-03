@@ -30,7 +30,7 @@ class CaseB does Pluggable {
         ];
 
     method test() {
-        my @plugins = @( $.plugins(:plugins-namespace('Extensions'), :matcher(/Plugin$/)) );
+        my @plugins = @( $.plugins(:plugins-namespace('Extensions'), :name-matcher(/Plugin$/)) );
         ok @plugins.map({ .WHAT.perl }).sort eqv @.expected.sort;
     }
 };

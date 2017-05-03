@@ -41,26 +41,26 @@ a::Plugins::PluginClass1::PluginClass2::Plugin3
 
 When "doing" the Pluggable role, a class can use the "plugins" method:
 
-    $.plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$matcher = Nil)
+    $.plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$name-matcher = Nil)
 
 ### :$base (optional)
 
 ### :$plugins-namespace (default: 'Plugins')
 
-### :$matcher (optional)
+### :$name-matcher (optional)
 
 ## Procedural Interface
 
 In a similar fashion, the module can be used in a non-OO environment, it exports
 a single sub:
 
-    plugins($base, :$plugins-namespace = 'Plugins', :$matcher = Nil)
+    plugins($base, :$plugins-namespace = 'Plugins', :$name-matcher = Nil)
 
 ### $base (required)
 
 ### :$plugins-namespace (default: 'Plugins')
 
-### :$matcher (optional)
+### :$name-matcher (optional)
 
 ## License
 
