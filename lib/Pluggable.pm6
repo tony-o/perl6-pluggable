@@ -3,17 +3,96 @@ unit role Pluggable;
 use JSON::Fast;
 use File::Find;
 
-# XXX pod
+=begin pod
 
-method plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$name-matcher = Nil) {
-    my $class = "{$base.defined ?? $base !! ::?CLASS.^name}";
-    return find-modules($class, $plugins-namespace, $name-matcher);
-}
+=head1 NAME
 
-# procedural interface
-sub plugins($base, :$plugins-namespace = 'Plugins', :$name-matcher = Nil) is export {
-    return find-modules($base, $plugins-namespace, $name-matcher);
-}
+Pluggable - dynamically find modules or classes under a given namespace
+
+This is a modified version orginally based on https://github.com/tony-o/perl6-pluggable.
+
+=head1 SYNOPSIS
+
+Given a set of plugins in your library search path:
+
+    a::Plugins::Plugin1
+    a::Plugins::Plugin2
+    a::Plugins::PluginClass1::PluginClass2::Plugin3
+
+And an invocation of Pluggable like this:
+
+    use Pluggable; 
+
+    class a does Pluggable {
+        method listplugins () {
+            @($.plugins).map({.perl}).join("\n").say;
+        }
+    }
+
+    a.new.listplugins;
+
+The following output would be produced:
+
+    a::Plugins::Plugin1
+    a::Plugins::Plugin2
+    a::Plugins::PluginClass1::PluginClass2::Plugin3
+
+=head1 FEATURES
+
+=item Role as well as procedural interface
+=item Custom module name matching
+=item Finding plugins outside of the current modules namespace 
+
+=head1 DESCRIPTION
+
+=head2 Object-Oriented Interface
+
+When "doing" the Pluggable role, a class can use the "plugins" method:
+
+    $.plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$name-matcher = Nil)
+
+=head3 :$base (optional)
+
+The base namespace to look for plugins under, if not provided then the namespace from which 
+pluggable is invoked is used.
+
+=head3 :$plugins-namespace (default: 'Plugins')
+
+The name of the namespace within I<$base> that contains plugins.
+
+=head3 :$name-matcher (optional)
+
+If present, the name of any module found will be compared with this and only returned if they match.
+
+=head2 Procedural Interface
+
+In a similar fashion, the module can be used in a non-OO environment, it exports
+a single sub:
+
+    plugins($base, :$plugins-namespace = 'Plugins', :$name-matcher = Nil)
+
+=head3 $base (required)
+
+The base namespace to look for plugins under. Unlike in the OO case, this is required in the procedural interface.
+
+=head3 :$plugins-namespace (default: 'Plugins')
+
+The name of the namespace within I<$base> that contains plugins.
+
+=head3 :$name-matcher (optional)
+
+If present, the name of any module found will be compared with this and only returned if they match.
+
+=head1 LICENSE
+
+Released under the Artistic License 2.0 L<http://www.perlfoundation.org/artistic_license_2_0>
+
+=head1 AUTHORS
+
+=item Robert Lemmen L<robertle@semistable.com>
+=item tony-o L<https://www.github.com/tony-o/>
+
+=end pod
 
 my sub match-try-add-module($module-name, $base, $namespace, $name-matcher, @result) {
     if (   ($module-name.chars > "{$base}::{$namespace}".chars)
@@ -64,5 +143,14 @@ my sub find-modules($base, $namespace, $name-matcher) {
         }
     }
     return @result.unique.Array;
+}
+
+method plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$name-matcher = Nil) {
+    my $class = "{$base.defined ?? $base !! ::?CLASS.^name}";
+    return find-modules($class, $plugins-namespace, $name-matcher);
+}
+
+sub plugins($base, :$plugins-namespace = 'Plugins', :$name-matcher = Nil) is export {
+    return find-modules($base, $plugins-namespace, $name-matcher);
 }
 
