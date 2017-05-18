@@ -11,7 +11,8 @@
         "Test::META"
     ],
     "test-depends" : [
-        "SVG::Plot::Pie"
+        "SVG::Plot::Pie",
+        "File::Find"
     ],
     "provides" : {
         "Pluggable" : "lib/Pluggable.pm6"
