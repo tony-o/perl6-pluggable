@@ -17,6 +17,7 @@
     "provides" : {
         "Pluggable" : "lib/Pluggable.pm6"
     },
+    "auth": "github:tony-o",
     "license" : "Artistic-2.0",
-    "source-url" : "https://github.com/robertlemmen/perl6-pluggable.git"
+    "source-url" : "https://github.com/tonyo/perl6-pluggable.git"
 }
