@@ -118,7 +118,8 @@ my sub find-modules($base, $namespace, $name-matcher) {
 
   for $*REPO.repo-chain -> $r {
     given $r.WHAT {
-      when CompUnit::Repository::FileSystem {
+        when CompUnit::Repository::FileSystem {
+            say $r.loaded;
         my @files = find(dir => $r.prefix, name => /\.pm6?$/);
         @files = map(-> $s { $s.substr($r.prefix.chars + 1) }, @files);
         @files = map(-> $s { $s.substr(0, $s.rindex('.')) }, @files);
