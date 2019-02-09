@@ -98,18 +98,18 @@ my sub match-try-add-module($module-name, $base, $namespace, $name-matcher, @res
   if (   ($module-name.chars > "{$base}::{$namespace}".chars)
     && ($module-name.starts-with("{$base}::{$namespace}")) ) {
 
-    if ((!defined $name-matcher) || ($module-name ~~ $name-matcher)) {
-      try {
-        CATCH {
-          default {
-            .say if ($*DEBUG-PLUGINS//False);
-            say .WHAT.perl, do given .backtrace[0] { .file, .line, .subname }
+      if ((!defined $name-matcher) || ($module-name ~~ $name-matcher)) {
+          try {
+              CATCH {
+                  default {
+                      .say if ($*DEBUG-PLUGINS//False);
+                      say .WHAT.perl, do given .backtrace[0] { .file, .line, .subname }
+                  }
+              }
+              require ::($module-name);
+              @result.push(::($module-name));
           }
-        }
-        require ::($module-name);
-        @result.push(::($module-name));
       }
-    }
   }
 }
 
@@ -119,28 +119,28 @@ my sub find-modules($base, $namespace, $name-matcher) {
   for $*REPO.repo-chain -> $r {
     given $r.WHAT {
         when CompUnit::Repository::FileSystem {
-            say $r.loaded;
-        my @files = find(dir => $r.prefix, name => /\.pm6?$/);
-        @files = map(-> $s { $s.substr($r.prefix.chars + 1) }, @files);
-        @files = map(-> $s { $s.substr(0, $s.rindex('.')) }, @files);
-        @files = map(-> $s { $s.subst(/\//, '::', :g) }, @files);
-        for @files -> $f {
-          match-try-add-module($f, $base, $namespace, $name-matcher, @result);
-        }
-      }
-      when CompUnit::Repository::Installation {
-        # XXX perhaps $r.installed() could be leveraged here, but it
-        # seems broken at the moment
-        my $dist_dir = $r.prefix.child('dist');
-        if ($dist_dir.?e) {
-          for $dist_dir.IO.dir.grep(*.IO.f) -> $idx_file {
-            my $data = from-json($idx_file.IO.slurp);
-            for $data{'provides'}.keys -> $f {
-              match-try-add-module($f, $base, $namespace, $name-matcher, @result);
+            next if ! $r.prefix.IO.d;
+            my @files = find(dir => $r.prefix, name => /\.pm6?$/);
+            @files = map(-> $s { $s.substr($r.prefix.chars + 1) }, @files);
+            @files = map(-> $s { $s.substr(0, $s.rindex('.')) }, @files);
+            @files = map(-> $s { $s.subst(/\//, '::', :g) }, @files);
+            for @files -> $f {
+                match-try-add-module($f, $base, $namespace, $name-matcher, @result);
             }
-          }
         }
-      }
+        when CompUnit::Repository::Installation {
+            # XXX perhaps $r.installed() could be leveraged here, but it
+            # seems broken at the moment
+            my $dist_dir = $r.prefix.child('dist');
+            if ($dist_dir.?e) {
+                for $dist_dir.IO.dir.grep(*.IO.f) -> $idx_file {
+                    my $data = from-json($idx_file.IO.slurp);
+                    for $data{'provides'}.keys -> $f {
+                        match-try-add-module($f, $base, $namespace, $name-matcher, @result);
+                    }
+                }
+            }
+        }
       # XXX do we need to support more repository types?
     }
   }
