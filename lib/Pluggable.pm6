@@ -94,7 +94,10 @@ Released under the Artistic License 2.0 L<http://www.perlfoundation.org/artistic
 
 =end pod
 
-my sub match-try-add-module($module-name, $base, $namespace, $name-matcher, @result) {
+my sub match-try-add-module($module-name is copy, $base, $namespace, $name-matcher, @result) {
+  # Hack, make it work on Windows
+  $module-name = $module-name.subst("\\", "::", :g);
+
   if (   ($module-name.chars > "{$base}::{$namespace}".chars)
     && ($module-name.starts-with("{$base}::{$namespace}")) ) {
 
