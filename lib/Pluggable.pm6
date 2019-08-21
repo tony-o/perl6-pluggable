@@ -122,7 +122,7 @@ my sub find-modules($base, $namespace, $name-matcher) {
         my @files = find(dir => $r.prefix, name => /\.pm6?$/);
         @files = map(-> $s { $s.substr($r.prefix.chars + 1) }, @files);
         @files = map(-> $s { $s.substr(0, $s.rindex('.')) }, @files);
-        @files = map(-> $s { $s.subst(/\//, '::', :g) }, @files);
+        @files = map(-> $s { $s.subst(/"{$*KERNEL~~/^win/??'\\'!!'/'}"/, '::', :g) }, @files);
         for @files -> $f {
           match-try-add-module($f, $base, $namespace, $name-matcher, @result);
         }
