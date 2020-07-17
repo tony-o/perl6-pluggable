@@ -1,6 +1,6 @@
 #!/usr/bin/env perl6
 
-use Pluggable; 
+use Pluggable;
 use Test;
 
 plan 1;
