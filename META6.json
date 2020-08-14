@@ -1,7 +1,7 @@
 {
     "perl" : "6.c",
     "name" : "Pluggable",
-    "version" : "0.4",
+    "version" : "0.5",
     "description" : "Find plugin classes or modules",
     "authors" : [
         "Robert Lemmen",
