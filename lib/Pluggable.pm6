@@ -94,56 +94,46 @@ Released under the Artistic License 2.0 L<http://www.perlfoundation.org/artistic
 
 =end pod
 
-my sub match-try-add-module($module-name, $base, $namespace, $name-matcher, @result) {
-  if (   ($module-name.chars > "{$base}::{$namespace}".chars)
-    && ($module-name.starts-with("{$base}::{$namespace}")) ) {
-
-    if ((!defined $name-matcher) || ($module-name ~~ $name-matcher)) {
-      try {
-        CATCH {
-          default {
-            .say if ($*DEBUG-PLUGINS//False);
-            say .WHAT.perl, do given .backtrace[0] { .file, .line, .subname }
-          }
-        }
-        require ::($module-name);
-        @result.push(::($module-name));
-      }
-    }
-  }
-}
-
 my sub find-modules($base, $namespace, $name-matcher) {
-  my @result = ();
+  my sub matching-namespaces($dist) {
+    return $dist.meta.hash<provides>.keys.grep(-> $module-name {
+      ($module-name.chars > "{$base}::{$namespace}".chars)
+      && ($module-name.starts-with("{$base}::{$namespace}"))
+      && ((!defined $name-matcher) || ($module-name ~~ $name-matcher))
+    });
+  }
 
-  for $*REPO.repo-chain -> $r {
-    given $r.WHAT {
-      when CompUnit::Repository::FileSystem {
-        my @files = find(dir => $r.prefix, name => /\.pm6?$/);
-        @files = map(-> $s { $s.substr($r.prefix.chars + 1) }, @files);
-        @files = map(-> $s { $s.substr(0, $s.rindex('.')) }, @files);
-        @files = map(-> $s { $s.subst(/"{$*KERNEL~~/^win/??'\\'!!'/'}"/, '::', :g) }, @files);
-        for @files -> $f {
-          match-try-add-module($f, $base, $namespace, $name-matcher, @result);
+  eager gather for $*REPO.repo-chain.grep(CompUnit::Repository::Installation | CompUnit::Repository::FileSystem) -> $repo {
+    my $distributions          := $repo ~~ CompUnit::Repository::FileSystem ?? $repo.distribution !! $repo.installed;
+    my $matching-distributions := $distributions.grep({ matching-namespaces($_).elems });
+    my $matches-to-process     := $matching-distributions.map(-> $dist {
+                                    Hash.new({
+                                      distribution   => $dist,
+                                      matching-specs => matching-namespaces($dist).map(-> $short-name {
+                                                        CompUnit::DependencySpecification.new(
+                                                          short-name      => $short-name,
+                                                          version-matcher => $dist.meta<version> || True,
+                                                          api-matcher     => $dist.meta<api>     || True,
+                                                          auth-matcher    => $dist.meta<auth>    || True,
+                                                        )
+                                                      }),
+                                    })
+                                  });
+
+    for @$matches-to-process -> %_ [:$distribution, :@matching-specs] {
+      for @matching-specs -> $matching-spec {
+        try {
+          # Ideally this .need() would replace the `require` below it since the require
+          # cannot take ver/api/auth attributes. However doing so causes 'no such symbol ...'
+          # errors when using `::(...)`. I wonder if the way `require` is working is actually
+          # a bug (namespace leaking outside of scope?)
+          #$repo.need($matching-spec);
+          require ::($matching-spec.short-name);
+          take ::($matching-spec.short-name);
         }
       }
-      when CompUnit::Repository::Installation {
-        # XXX perhaps $r.installed() could be leveraged here, but it
-        # seems broken at the moment
-        my $dist_dir = $r.prefix.child('dist');
-        if ($dist_dir.?e) {
-          for $dist_dir.IO.dir.grep(*.IO.f) -> $idx_file {
-            my $data = from-json($idx_file.IO.slurp);
-            for $data{'provides'}.keys -> $f {
-              match-try-add-module($f, $base, $namespace, $name-matcher, @result);
-            }
-          }
-        }
-      }
-      # XXX do we need to support more repository types?
     }
   }
-  return @result.unique.Array;
 }
 
 method plugins(:$base = Nil, :$plugins-namespace = 'Plugins', :$name-matcher = Nil) {
